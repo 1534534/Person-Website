@@ -1,0 +1,126 @@
+body {
+  position: relative;
+  /* background-image: url("https://w.wallhaven.cc/full/l3/wallhaven-l3lrqy.jpg"); */
+  background-color: rgb(106, 234, 244);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  font-size: 20px;
+  width: 100%;
+  font-family: "Courier New", Courier, monospace;
+
+  font-weight: bold;
+  height: 100%;
+}
+a{
+  text-decoration: none;
+}
+html {
+  height: 100%;
+}
+/* 头像栏 */
+.image {
+  position: absolute;
+  left: 2%;
+  top: 2%;
+  display: block;
+  border-radius: 50%;
+  height: 10%;
+}
+
+.name {
+  position: absolute;
+  color: blue;
+  font-size: 25px;
+  left: 1%;
+  top: 11%;
+}
+
+/* .touXiang {
+ flex-direction: column;
+} */
+/* 显示上线时间 */
+.showTime {
+  position: absolute;
+  top: 7%;
+  right: 5%;
+  font-style: italic;
+  font-size: 100%;
+  font-weight: bolder;
+  text-align: center;
+  color: #2112cb;
+  text-decoration: underline;
+}
+/* 快速通道栏 */
+.wenBen {
+  position: absolute;
+  top: 300px;
+  left: 100px;
+  width: 150px;
+  border: white 3px solid;
+  border-color: white;
+  border-radius: 25px;
+  border-style: solid;
+
+  /* max-width: 800px; */
+
+  padding: 15px;
+  line-height: 1.8em;
+  font-weight: lighter;
+ 
+  text-decoration: none;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+}
+.wenBen a,.game a {
+  
+  color: rgb(183, 35, 178);
+}
+a:link {
+  color: rgb(232, 29, 188);
+}
+
+a:hover {
+  color: rgb(216, 51, 14);
+}
+.path {
+    
+  font-size: 30px;
+  color: rgb(45, 177, 25);
+}
+#footer {
+  /* margin-bottom: 5%; */
+  position: absolute;
+  bottom: 5%;
+  left: 40%;
+}
+/* @media screen and (min-width: 500px) {
+} */
+
+.game{
+position: absolute;
+  top: 300px;
+  left: 300px;
+  width: 150px;
+  border: white 3px solid;
+  border-color: white;
+  border-radius: 25px;
+  border-style: solid;
+
+  /* max-width: 800px; */
+
+  padding: 10px;
+  line-height: 1.8em;
+  font-weight: lighter;
+ 
+  text-decoration: none;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+}
+.game span{
+  
+    font-size: 35px;
+    display: block;
+  color: rgb(45, 177, 25);
+}

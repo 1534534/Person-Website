@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+
+    <title>Document</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        display: flex;
+        padding: 0;
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background-color: rgb(0, 200, 255);
+        position: relative;
+      }
+      /* 头部大标题 */
+      .title {
+        display: inline-block;
+        margin: 28px;
+        color: white;
+        font-size: 40px;
+      }
+      /* 画布 */
+      .canvas {
+        background-color: antiquewhite;
+        border-top-radius: 10px;
+        margin: 0;
+      }
+      /* 规则栏显示按钮 */
+      .rule-btn {
+        position: absolute;
+        cursor: pointer;
+        left: 50px;
+        top: 60px;
+        font-size: 20px;
+        background-color: black;
+        color: white;
+        border-radius: 8px;
+        padding: 5px 10px;
+        border: none;
+      }
+      .rule-btn:hover {
+        background: white;
+        color: rgb(30, 119, 167);
+      }
+      .rule-btn:checked + .rules {
+        left: 0px;
+      }
+      .rule-btn:focus {
+        outline: 0;
+      }
+      /* 规则栏 */
+      .rules {
+        position: absolute;
+        background-color: rgb(51, 49, 49);
+        color: white;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        width: 200px;
+        height: 500px;
+        left: 0;
+        top: 150px;
+        padding: 10px;
+        box-shadow: 0 0 5px black;
+        overflow: hidden;
+        transform: translateX(-205px);
+        transition: transform 0.5s ease-in-out;
+      }
+
+      .rules.show {
+        transform: translateX(0);
+      }
+
+      /* 规则栏关闭按钮 */
+      .close-btn {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        font-size: 20px;
+        background-color: black;
+        color: white;
+        border-radius: 8px;
+        padding: 5px 10px;
+      }
+      .close-btn:hover {
+        background: white;
+        color: rgb(51, 49, 49);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title">Breakout!</div>
+
+    <button id="rule-btn" class="rule-btn">Show Rule</button>
+    <div id="rules" class="rules">
+      <h2>How To Play:</h2>
+      <p>
+        Use your right and left keys to move the paddle to bounce the ball up
+        and break the blocks.
+      </p>
+      <p>If you miss the ball, your score and the blocks will reset.</p>
+      <button id="close-btn" class="close-btn">I Known</button>
+    </div>
+    <canvas id="canvas" class="canvas" width="900px" height="600"></canvas>
+    <script>
+      const rulesBtn = document.getElementById("rule-btn");
+      const closeBtn = document.getElementById("close-btn");
+      const rules = document.getElementById("rules");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // 声明分数初始值
+      let score = 0;
+      // 设置每排砖块数
+      const brickRowCount = 43;
+      // 设置每列砖块数
+      const brickColumnCount = 35;
+      const delay = 500;
+
+      // 创建球体数据
+      const ball = {
+        x: canvas.width / 2 + 10,
+        y: canvas.height - 12,
+        size: 2,
+        speed: 2,
+        dx: 2,
+        dy: -2,
+        visible: true,
+      };
+      // 创建踏板数据
+      const paddle = {
+        x: canvas.width / 2,
+        y: canvas.height - 10,
+        w: 50,
+        h: 5,
+        dx: 0,
+        speed: 2.5,
+        visible: true,
+      };
+
+      // 创建砖块数据
+      const brickInfo = {
+        w: 18,
+        h: 9,
+        padding: 2,
+
+        offsetX: 20,
+        offsetY: 50,
+        visible: true,
+      };
+      // 创建砖块
+      const bricks = [];
+      for (let i = 0; i < brickRowCount; i++) {
+        bricks[i] = [];
+        for (let j = 0; j < brickColumnCount; j++) {
+          const x = i * (brickInfo.w + brickInfo.padding) + brickInfo.offsetX;
+          const y = j * (brickInfo.h + brickInfo.padding) + brickInfo.offsetY;
+          bricks[i][j] = { x, y, ...brickInfo };
+        }
+      }
+
+      // 画出球体
+      function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
+        ctx.fillStyle = ball.visible ? "#0095dd" : "transparent";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      // 画出踏板
+      function drawPaddle() {
+        ctx.beginPath();
+        ctx.rect(paddle.x, paddle.y, paddle.w, paddle.h);
+        ctx.fillStyle = paddle.visible ? "#0095dd" : "transparent";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      // 分数栏
+      function drawScore() {
+        ctx.font = '25px IconFont'; 
+        ctx.fillText(`Score:${score}`, canvas.width - 150, 35);
+      }
+
+      // 创建砖块
+      function drawBricks() {
+        bricks.forEach((column) => {
+          column.forEach((brick) => {
+            ctx.beginPath();
+            ctx.rect(brick.x, brick.y, brick.w, brick.h);
+            ctx.fillStyle = brick.visible ? "#0095dd" : "transparent";
+            ctx.fill();
+            ctx.closePath();
+          });
+        });
+      }
+
+      // 移动踏板
+      function movePaddle() {
+        paddle.x += paddle.dx;
+        // 当踏板到右边界时停止
+        if (paddle.x + paddle.w > canvas.width) {
+          paddle.x = canvas.width - paddle.w;
+        }
+        // 当踏板到左边界时停止
+        if (paddle.x < 0) {
+          paddle.x = 0;
+        }
+      }
+
+      // 球体的移动
+      function moveBall() {
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+        //   球体撞到上左右边界反弹
+        if (ball.x + ball.size > canvas.width || ball.x - ball.size < 0) {
+          ball.dx *= -1;
+        }
+        if (ball.y - ball.size < 0 || ball.y + ball.size > canvas.height) {
+          ball.dy *= -1;
+        }
+
+        // 踏板未接住球体重新开始
+        if (ball.y + ball.size > canvas.height) {
+          showAllBricks();
+          score = 0;
+        }
+        // 踏板撞击球体事件
+        if (
+          ball.x > paddle.x &&
+          ball.x < paddle.x + paddle.w &&
+          ((ball.y + ball.size > paddle.y && ball.y < paddle.y) ||
+            (ball.y - ball.size < paddle.y + paddle.h &&
+              ball.y > paddle.y + paddle.h))
+        ) {
+          ball.dy = -ball.dy;
+        }
+
+        // 球体撞击砖块事件
+        bricks.forEach((column) => {
+          column.forEach((brick) => {
+            if (brick.visible) {
+              if (
+                ball.x + ball.size > brick.x && // left brick side check
+                ball.x - ball.size < brick.x + brick.w && // right brick side check
+                ball.y + ball.size > brick.y && // top brick side check
+                ball.y - ball.size < brick.y + brick.h // bottom brick side check
+              ) {
+                brick.visible = false;
+                ball.dy *= -1;
+
+                increaseScore();
+              } else if (
+                ball.x + ball.size > paddle.x &&
+                ball.x - ball.size < paddle.x + paddle.w &&
+                ball.y > paddle.y &&
+                ball.y < paddle + paddle.h
+              ) {
+                brick.visible = false;
+                ball.dx *= -1;
+
+                increaseScore();
+              }
+            }
+          });
+        });
+      }
+      // 实现分数的自增长
+      function increaseScore() {
+        score++;
+        if (score % (brickColumnCount * brickRowCount) == 0) {
+          ball.visible = false;
+          paddle.visible = false;
+          setTimeout(function () {
+            showAllBricks();
+            score = 0;
+            paddle.x = canvas.width / 2;
+            paddle.y = canvas.height;
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height;
+            ball.visible = true;
+            paddle.visible = true;
+          }, delay);
+        }
+      }
+      // 显示所有的砖块
+      function showAllBricks() {
+        bricks.forEach((column) => {
+          column.forEach((brick) => (brick.visible = true));
+        });
+      }
+      // 按键按下时移动踏板
+      function keyDown(e) {
+        if (e.key === "Right" || e.key === "ArrowRight") {
+          paddle.dx = paddle.speed;
+        } else if (e.key === "Left" || e.key === "ArrowLeft") {
+          paddle.dx = -paddle.speed;
+        }
+      }
+      // 按键弹起时停止移动
+      function keyUp(e) {
+        if (
+          e.key === "Right" ||
+          e.key === "Left" ||
+          e.key === "ArrowLeft" ||
+          e.key === "ArrowRight"
+        ) {
+          paddle.dx = 0;
+        }
+      }
+
+      // 画所有物品
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawBall();
+        drawPaddle();
+        drawScore();
+        drawBricks();
+      }
+
+      //
+      function update() {
+        moveBall();
+        movePaddle();
+        draw();
+        requestAnimationFrame(update);
+      }
+      // 调用函数执行
+      update();
+
+      // 获取按键事件
+      document.addEventListener("keydown", keyDown);
+      document.addEventListener("keyup", keyUp);
+      // 规则栏显示设置
+      rulesBtn.addEventListener("click", () => rules.classList.add("show"));
+      closeBtn.addEventListener("click", () => rules.classList.remove("show"));
+      //
+    </script>
+  </body>
+</html>
